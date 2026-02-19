@@ -1,14 +1,16 @@
-This is an _alpha_ release. Don't use it if you are not interested in
-svgalib development.
+This is experimental software. Try it out. If something doesn't work, open an
+issue. I can't guarantee I'll be able to fix it though.
 
-Program using svgalib 1.9.0 or later don't need root provoleges (suid
-root). They do need access to /dev/svga, which is a char device
-with major 209 and minor 0.
-The module svgalib_helper need also be inserted.
+Programs require root to use this library directly.
 
-To make the devices, and the module (kernel 2.4 or newer), change to directory
-kernel/svgalib_helper, and type make install.
+You also need libx86, this seems to be a decent fork of it, if you need
+something up to date: https://gitlab.archlinux.org/grawlinson/libx86
 
-There is a compile time option to return to old behaviour, of using root
-privileges to access /dev/mem, instead of svgalib helper. To compile for this
-select the NO_HELPER option in Makefile.cfg.
+This fork gets rid of the helper kernel module, which historically allowed
+this library to be used by applications without root privileges. My reasoning
+is that kernel modules are not very maintainable, because the Linux kernel
+sources aren't very stable.
+
+Instead, I recommend one make a setuid daemon that uses unix sockets or a
+user-accessible section of shared memory, which would be much more
+maintainable, and could still be decent in speed if done right, I reckon.
