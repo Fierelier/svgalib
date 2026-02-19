@@ -319,7 +319,6 @@ unsigned char __svgalib_novccontrol = 0; /* this is not the main card with VC'S 
 unsigned char __svgalib_ragedoubleclock = 0;
 unsigned char __svgalib_simple = 0;
 unsigned char __svgalib_neolibretto100 = 0;
-unsigned char __svgalib_nohelper = 0;
 static unsigned char __svgalib_nohelper_secure = 1;
 unsigned char __svgalib_fbdev_novga = 0;
 
@@ -809,10 +808,7 @@ static void open_mem(void)
     if (__svgalib_mem_fd == -1)
     {
         const char *device;
-        if (__svgalib_nohelper)
-            device = "/dev/mem";
-        else
-            device = helper_device;
+        device = "/dev/mem";
 	if ((__svgalib_mem_fd = open(device, O_RDWR)) == -1) {
 	    fprintf(stderr,"svgalib: Cannot open %s\n%s\n", device,
 	        __svgalib_nohelper?
@@ -846,16 +842,12 @@ static void __svgalib_get_perm(void)
     {
         __svgalib_emulatepage=1;
         __svgalib_novga=1;
-        __svgalib_nohelper=1;
     }
     else
     {
 #ifdef IO_DRIVERS
-    if (__svgalib_nohelper)
-    {
 	iopl(3);
 	ioperm(0, 0x400, 1);
-    }
 #endif
     
     /* Open /dev/svga */
@@ -892,47 +884,45 @@ static void __svgalib_giveup_perm(void)
            real pci ID there, only the helper module id. Also this
            is not usefull in helpermode since mem_fd must always be left
            open in helpermode. */
-        if (__svgalib_nohelper) {
-            unsigned int bus, device, fn;
-            char buf[256];
-            FILE *f;
-            int i, fd;
-            
-            bus=(__svgalib_pci_card_found_at&0xff00)>>8;
-            device=(__svgalib_pci_card_found_at&0xf8)>>3;
-            fn=__svgalib_pci_card_found_at&0x07;
-            snprintf(buf, 256, "/sys/bus/pci/devices/0000:%02u:%02x.%u/resource",
-                bus, device, fn);
-                
-            f = fopen(buf, "r");
-            if (f) {
-                for (i=0; fgets(buf, 256, f); i++) {
-                    if (strtoul(buf, NULL, 16) == __svgalib_linear_mem_base) {
-                       snprintf(buf, 256,
-                          "/sys/bus/pci/devices/0000:%02u:%02x.%u/resource%i",
-                          bus, device, fn, i);
-                       fd = open(buf, O_RDWR);
-                       if (fd != -1) {
-                           __svgalib_linear_mem_fd = fd;
-                           __svgalib_linear_mem_base = 0;
+		unsigned int bus, device, fn;
+		char buf[256];
+		FILE *f;
+		int i, fd;
+		
+		bus=(__svgalib_pci_card_found_at&0xff00)>>8;
+		device=(__svgalib_pci_card_found_at&0xf8)>>3;
+		fn=__svgalib_pci_card_found_at&0x07;
+		snprintf(buf, 256, "/sys/bus/pci/devices/0000:%02u:%02x.%u/resource",
+			bus, device, fn);
+			
+		f = fopen(buf, "r");
+		if (f) {
+			for (i=0; fgets(buf, 256, f); i++) {
+				if (strtoul(buf, NULL, 16) == __svgalib_linear_mem_base) {
+				   snprintf(buf, 256,
+					  "/sys/bus/pci/devices/0000:%02u:%02x.%u/resource%i",
+					  bus, device, fn, i);
+				   fd = open(buf, O_RDWR);
+				   if (fd != -1) {
+					   __svgalib_linear_mem_fd = fd;
+					   __svgalib_linear_mem_base = 0;
 #ifdef DEBUG
-                           fprintf(stderr, "svgalib: debug: Opened: %s as LFB\n",
-                               buf);
+					   fprintf(stderr, "svgalib: debug: Opened: %s as LFB\n",
+						   buf);
 #endif
-                       }
-                       break;
-                    }
-                }
-                fclose(f);
-            }
-        }
+				   }
+				   break;
+				}
+			}
+			fclose(f);
+		}
     }
 
     /* mmap graphics memory */
     map_mem();
     map_mmio();
 
-    if(__svgalib_nohelper && __svgalib_nohelper_secure &&
+    if(__svgalib_nohelper_secure &&
        (__svgalib_mem_fd != -1))
     {
         close(__svgalib_mem_fd);
@@ -1410,7 +1400,7 @@ void vga_setchipset(int c)
     }
     
     /* we need to read the configfile here to get the correct value
-       for __svgalib_nohelper and __svgalib_nohelper_secure */
+       for __svgalib_nohelper_secure */
     readconfigfile();
     
 #ifdef _SVGALIB_LRMI
@@ -1430,7 +1420,7 @@ void vga_setchipsetandfeatures(int c, int par1, int par2)
     DPRINTF("Forcing chipset and features\n");
 
     /* we need to read the configfile here to get the correct value
-       for __svgalib_nohelper and __svgalib_nohelper_secure */
+       for __svgalib_nohelper_secure */
     readconfigfile();
     
 #ifdef _SVGALIB_LRMI
@@ -2939,10 +2929,7 @@ void vga_setdisplaystart(int a)
 			return;
 		}
     /* Call the regular display start function for the chipset */
-	if( (MODEFLAGS & IOCTL_SETDISPLAY) && !__svgalib_nohelper)
-		ioctl(__svgalib_mem_fd, SVGAHELPER_SETDISPLAYSTART, a);	
-	else
-		__svgalib_driverspecs->setdisplaystart(a);
+	__svgalib_driverspecs->setdisplaystart(a);
 }
 
 void vga_bitblt(int srcaddr, int destaddr, int w, int h, int pitch)
@@ -3712,7 +3699,7 @@ static char *process_option(int command, int mode, char **nptr)
         if (!(ptr = __svgalib_token(nptr)))
             return param_needed(command);
 
-	if (!mode && __svgalib_nohelper) {
+	if (!mode) {
 	    /* skip textprog args */
             while(((ptr=__svgalib_token(nptr))!=NULL) && strcmp(ptr,"END")) {}
             return override_denied(command, nptr);
@@ -3935,12 +3922,10 @@ static char *process_option(int command, int mode, char **nptr)
 	case 73:
 		if (!mode)
 			return override_denied(command, nptr);
-		__svgalib_nohelper = 1;
 		break;
 	case 74:
 		if (!mode)
 			return override_denied(command, nptr);
-		__svgalib_nohelper = 1;
 		__svgalib_nohelper_secure = 0;
 		break;		
 	case 75:
@@ -3970,7 +3955,7 @@ static void readconfigfile(void)
 
 	/* Can't access /dev/mem after init, so we can't do vga modes with fbdev.
        Note we must do this check before calling setchipset! */
-    if(__svgalib_nohelper && __svgalib_nohelper_secure)
+    if(__svgalib_nohelper_secure)
         __svgalib_fbdev_novga = 1;
 
 	if ((CHIPSET == UNDEFINED) && (configfile_chipset != UNDEFINED))

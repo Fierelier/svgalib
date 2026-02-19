@@ -670,7 +670,7 @@ static int init(int force, int par1, int par2)
 		mmio_base=buf[5]&0xffffff00;
     } else return 1; 
 
-	if(__svgalib_nohelper && __svgalib_i810_usegtt) {
+	if(__svgalib_i810_usegtt) {
 		/* Can't use GTT withoout helper */
 
 		fprintf(stderr, "I810: WARNING: Can't use GTT without kernel helper.\n"

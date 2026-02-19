@@ -176,15 +176,6 @@ installconfig:
 installman:
 	(cd doc; $(MAKE) -f $(SRCDIR)/doc/Makefile SRCDIR="$(SRCDIR)" install )
 
-installmodule:
-	(cd kernel/svgalib_helper ; $(MAKE) default modules_install )
-
-installmodule.alt:
-	(cd kernel/svgalib_helper ; $(MAKE) -f Makefile.alt modules_install )
-
-installdev:
-	(cd kernel/svgalib_helper ; $(MAKE) device )
-
 lib3dkit-install:
 	(cd threeDKit/; $(MAKE) install)
 
@@ -322,7 +313,6 @@ distclean:
 	(cd $(SRCDIR)/demos; $(MAKE) clean)
 	(cd $(SRCDIR)/threeDKit; $(MAKE) clean)
 	(cd $(SRCDIR)/lrmi-0.6m; $(MAKE) clean)
-	(cd $(SRCDIR)/kernel/svgalib_helper; $(MAKE) clean)
 	rm -f *.orig
 	find . \( -name '.depend*' -o -name '*~*' \) -exec rm {} \;
 	rm -rf sharedlib/[!l]* sharedlib/l[!i]* sharedlib/li[!b]* staticlib
@@ -340,13 +330,5 @@ indent:
 indent-gnu:
 	find demos gl mach src support -name '*.[ch]' -exec indent -gnu {} \;
 	indent -gnu src/*.regs
-
-dkms:
-	rm -rf /usr/src/svgalib_helper-$(VERSION)
-	mkdir -p /usr/src/svgalib_helper-$(VERSION)
-	cp -a kernel/svgalib_helper/* /usr/src/svgalib_helper-$(VERSION)
-	dkms add -m svgalib_helper -v $(VERSION)
-	dkms build -m svgalib_helper -v $(VERSION)
-	dkms install -m svgalib_helper -v $(VERSION)
 
 FORCE:

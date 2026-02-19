@@ -154,7 +154,6 @@ extern unsigned char __svgalib_novccontrol;
 extern unsigned char __svgalib_m_ignore_dx;
 extern unsigned char __svgalib_m_ignore_dy;
 extern unsigned char __svgalib_m_ignore_dz;
-extern unsigned char __svgalib_nohelper;
 extern unsigned char __svgalib_fbdev_novga;
 extern char *__joystick_devicenames[4];
 

@@ -40,19 +40,12 @@ vga_cardinfo *vga_getcardinfo(void) {
 
 void vga_waitretrace(void)
 {
-#if 0
-    if(!__svgalib_nohelper)
-        ioctl(__svgalib_mem_fd, SVGAHELPER_WAITRETRACE, NULL);
-    else
-#endif
-    {
-        if (__svgalib_driverspecs->emul && __svgalib_driverspecs->emul->waitretrace) {
-            __svgalib_driverspecs->emul->waitretrace();
-        } else {
-            while (!(__svgalib_inis1() & 8));
-            while (__svgalib_inis1() & 8);
-        }
-    }
+	if (__svgalib_driverspecs->emul && __svgalib_driverspecs->emul->waitretrace) {
+		__svgalib_driverspecs->emul->waitretrace();
+	} else {
+		while (!(__svgalib_inis1() & 8));
+		while (__svgalib_inis1() & 8);
+	}
 }
 
 /*
