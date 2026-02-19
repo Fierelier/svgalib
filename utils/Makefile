@@ -60,7 +60,7 @@ install:
 	$(INSTALLPROG) $(UTILPROGS) $(UTILINSTALLDIR)
 
 .depend:
-	gcc $(INCLUDES) -MM $(patsubst %.o,$(srcdir)/utils/%.c,$(OBJECTS)) >.depend
+	$(CC) $(INCLUDES) -MM $(patsubst %.o,$(srcdir)/utils/%.c,$(OBJECTS)) >.depend
 
 #
 # include a dependency file if one exists
