@@ -32,18 +32,19 @@ static inline int RGB2BGR(int c)
 /* a bswap would do the same as the first 3 but in only ONE! cycle. */
 /* However bswap is not supported by 386 */
 
+// TODO: Fix asm
     if (MODEFLAGS & MODEFLAG_24BPP_REVERSED)
-#ifdef NO_ASSEMBLY
+//#ifdef NO_ASSEMBLY
 	c = ((c >> 0) & 0xff) << 16 |
 	    ((c >> 8) & 0xff) << 8 |
 	    ((c >> 16) & 0xff) << 0;
-#else
-	asm("rorw  $8, %0\n"	/* 0RGB -> 0RBG */
-	    "rorl $16, %0\n"	/* 0RBG -> BG0R */
-	    "rorw  $8, %0\n"	/* BG0R -> BGR0 */
-	    "shrl  $8, %0\n"	/* 0BGR -> 0BGR */
-      : "=q"(c):"0"(c));
-#endif
+//#else
+//	asm("rorw  $8, %0\n"	/* 0RGB -> 0RBG */
+//	    "rorl $16, %0\n"	/* 0RBG -> BG0R */
+//	    "rorw  $8, %0\n"	/* BG0R -> BGR0 */
+//	    "shrl  $8, %0\n"	/* 0BGR -> 0BGR */
+//      : "=q"(c):"0"(c));
+//#endif
     return c;
 }
 
