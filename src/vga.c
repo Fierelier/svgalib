@@ -811,9 +811,8 @@ static void open_mem(void)
         device = "/dev/mem";
 	if ((__svgalib_mem_fd = open(device, O_RDWR)) == -1) {
 	    fprintf(stderr,"svgalib: Cannot open %s\n%s\n", device,
-	        __svgalib_nohelper?
-	        "Are you running this program as root or suid-root?":
-		"Is svgalib_helper module loaded?");
+	        "Are you running this program as root or suid-root?"
+	    );
 	    exit(1);
 	}
     }
