@@ -187,10 +187,10 @@ installdev:
 
 lib3dkit-install:
 	(cd threeDKit/; $(MAKE) install)
-	 
+
+# TODO: fix lib3dkit-install
 install: installheaders $(INSTALLSHAREDLIB) installconfig \
-	$(INSTALLSTATICLIB) $(INSTALLUTILS) $(INSTALLMAN) $(INSTALLMODULE) $(INSTALLDEV) \
-	lib3dkit-install
+	$(INSTALLSTATICLIB) $(INSTALLUTILS) $(INSTALLMAN) $(INSTALLMODULE) $(INSTALLDEV)
 	@echo
 	@echo
 	@echo Now run "'make demoprogs'" to make the test and demo programs in
